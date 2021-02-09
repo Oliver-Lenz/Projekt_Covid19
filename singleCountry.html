@@ -1,0 +1,156 @@
+<html>
+    <head>
+        <style>
+            th {
+                text-align:right;
+                font:Arial;
+                padding-right: 5px;
+            }
+            table, td {
+                text-align:left;
+                border: none;
+                border-collapse: collapse;
+                font: 15px Arial, sans-serif;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="jquery-3.5.1.js"></script>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+        
+        <select id="countrySelector"></select>
+        
+        <table style="width:100%;" boarder="0" cellspacing="0" cellpadding="0">
+            <tr style="boarder:none">
+                <td style="width:20%">
+                    <table style="width:100%;">
+                        <tr>
+                            <th>Date(from/to):</th>
+                            <td id="date"></td>
+                        </tr>
+                        <tr>
+                            <th>Population:</th>
+                            <td id="popu"></td>
+                        </tr>
+                        <tr>
+                            <th>Most cases in a day:</th>
+                            <td id="highCas"></td>
+                        </tr>
+                        <tr>
+                            <th>Most deaths in a day:</th>
+                            <td id="highDea"></td>
+                        </tr>
+                        <tr>
+                            <th>Sum. cases:</th>
+                            <td id="sumCas"></td>
+                        </tr>
+                        <tr>
+                            <th>Sum. deaths:</th>
+                            <td id="sumDea"></td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width:80%"><div id="plot"></div></td> 
+            </tr>
+        </table>
+        
+        <script>
+            var selectedCountry = "Germany";
+            $.ajaxSetup({async: false});
+            var countryList = [];
+            
+            $.post("database.php", {select:"countrys"}, function(awns){
+                var daten = $.parseJSON(awns);
+                
+                for(var i = 0; i< daten.length; i++){
+                    countryList.push(Object.values(daten[i]));
+                }
+                //console.log(countryList);
+                var sel = document.getElementById('countrySelector');
+                for(var i = 0; i < countryList.length; i++) {
+                    var opt = document.createElement('option');
+                    opt.innerHTML = countryList[i];
+                    opt.value = countryList[i];
+                    sel.appendChild(opt);
+                }
+            });
+            
+            function plotGraph(){
+                var str = document.getElementById("countrySelector");
+                selectedCountry = str.options[str.selectedIndex].value;
+                //console.log(selectedCountry);
+                
+                var datenCases;
+                var datenDeaths;
+                $.post("database.php", {select:"cases", country:selectedCountry}, function(awns){
+                    datenCases = $.parseJSON(awns);
+                });
+                $.post("database.php", {select:"deaths", country:selectedCountry}, function(awns){
+                    datenDeaths = $.parseJSON(awns);
+                });
+                
+                var arrDateCases = [];
+                var arrCases = [];
+                for(var i = 0; i < datenCases.length; i++){
+                    arrDateCases.push(Object.values(datenCases[i])[0]);
+                    arrCases.push(Object.values(datenCases[i])[1]);
+                }
+                
+                var arrDateDeaths = [];
+                var arrDeaths= [];
+                for(var i = 0; i < datenDeaths.length; i++){
+                    arrDateDeaths.push(Object.values(datenDeaths[i])[0]);
+                    arrDeaths.push(Object.values(datenDeaths[i])[1]);
+                }
+                
+                
+                var trace1 = {
+                    x: arrDateCases,
+                    y: arrCases,
+                    type: 'scatter',
+                    name: 'Cases'
+                };
+                
+                var trace2 = {
+                    x: arrDateDeaths,
+                    y: arrDeaths,
+                    type: 'scatter',
+                    name: 'Deaths',
+                    line: {color: 'rgb(200, 0, 0)'}
+                };
+                
+                var data = [trace1, trace2];
+
+                var layout = {
+                    title: selectedCountry,
+                }
+                
+                var config = {responsive: true}
+                
+                Plotly.react('plot', data, layout, config);
+                
+                $.post("database.php", {select:"data", country:selectedCountry}, function(awns){
+                    var daten = $.parseJSON(awns);
+                    document.getElementById("date").innerHTML = Object.values(daten[0])[0] + " - " + Object.values(daten[0])[1];
+                    document.getElementById("popu").innerHTML = Object.values(daten[0])[2];
+                    document.getElementById("highCas").innerHTML = Object.values(daten[0])[3];
+                    document.getElementById("highDea").innerHTML = Object.values(daten[0])[4];
+                    document.getElementById("sumCas").innerHTML = Object.values(daten[0])[5];
+                    document.getElementById("sumDea").innerHTML = Object.values(daten[0])[6];
+                });
+                
+            }
+            //weil sich der div für den graph die höhe immer resettet
+            function plotGraph2(){
+                plotGraph();
+                setTimeout(function(){
+                    plotGraph();
+                }, 1);
+            }
+            plotGraph();
+            document.getElementById("countrySelector").addEventListener('change', plotGraph2, false);
+
+        </script>
+
+    </body>
+</html>

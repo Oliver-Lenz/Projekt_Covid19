@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            * {box-sizing: border-box}
+
+            /* Set height of body and the document to 100% */
+            body, html {
+                height: 100%;
+                width: 100%;
+                margin: 0;
+                font-family: Arial;
+                overflow: hidden;
+            }
+
+            /* Style tab links */
+            .item0 {
+                background-color: #555;
+                color: white;
+                float: left;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                padding: 14px 16px;
+                font-size: 17px;
+                width: 33%;
+            }
+            .item1 {
+                background-color: #555;
+                color: white;
+                float: left;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                padding: 14px 16px;
+                font-size: 17px;
+                width: 34%;
+            } 
+
+            .item0:hover {
+                background-color: #777;
+            }
+            .item1:hover {
+                background-color: #777;
+            }
+
+            /* Style the tab content (and add height:100% for full page content) */
+            .tabcontent {
+                display: none;
+                width: 100%;
+                padding: 0px 0px;
+                height: 100%;
+            }
+        </style>
+        <title>DBS COVID-19 Graphen</title>
+    </head>
+    <body>
+
+        <button class="item0" onclick="openPage('Single Country', this)" id="defaultOpen">Single Country</button>
+        <button class="item1" onclick="openPage('Multi Country', this)" >Compare Countrys</button>
+        <button class="item0" onclick="openPage('Choropleth', this)">Choropleth</button>
+
+        <iframe src="http://dicag43.userpage.fu-berlin.de/dbs/singleCountry" id="Single Country" allowTransparency="true" scrolling="yes" frameborder="0" class="tabcontent"></iframe>
+        
+        <iframe src="http://dicag43.userpage.fu-berlin.de/dbs/multiCountry" id="Multi Country" allowTransparency="true" scrolling="yes" frameborder="0" class="tabcontent"></iframe>
+
+        <iframe src="http://dicag43.userpage.fu-berlin.de/dbs/choropleth" id="Choropleth" allowTransparency="true" scrolling="yes" frameborder="0" class="tabcontent"></iframe>
+
+
+        <script>
+            function openPage(pageName,elmnt) {
+              var i, tabcontent, tablinks;
+              tabcontent = document.getElementsByClassName("tabcontent");
+              for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+              }
+              document.getElementById(pageName).style.display = "block";
+            }
+
+            // Get the element with id="defaultOpen" and click on it
+            document.getElementById("defaultOpen").click();
+        </script>
+
+    </body>
+</html> 

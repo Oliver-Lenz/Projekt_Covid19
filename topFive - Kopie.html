@@ -1,0 +1,118 @@
+<html>
+    <head>
+        <style>
+            
+            
+        </style>
+    </head>
+    <body>
+        <script src="jquery-3.5.1.js"></script>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+        
+        
+        <table style="width:100%">
+            <tr>
+                <td><div width=100% id="plotCases"></div></td>
+                <td><div width=100% id="plotDeaths"></div></td> 
+            </tr>
+        </table>
+        <script>
+            $.ajaxSetup({async: false});
+            
+            function plotGraph(){
+                
+                //data collection
+                var topFive = [];
+                var topFiveNumbers = [];
+                var data;
+                
+                $.post("database.php", {select:"topfivecases"}, function(awns){
+                    data = $.parseJSON(awns);
+                });
+                
+                for(var i = 0; i < data.length; i++){
+                    topFive.push(Object.values(data[i])[0]);
+                    topFiveNumbers.push(Object.values(data[i])[1]);
+                }
+                
+                $.post("database.php", {select:"topfivecasesrest"}, function(awns){
+                    data = $.parseJSON(awns);
+                });
+
+                var config = {responsive: true}
+                
+                //Cases Bar chart
+                var trace1 = {
+                    values: topFiveNumbers,
+                    type: 'pie',
+                    labels: topFive
+                };
+
+                var data1 = [trace1];
+
+                var layout1 = {
+                    title: 'Top country sum. Cases'
+                }
+                Plotly.react(plotCases, data1, layout1, config);
+                
+                
+                //data collection
+                var topFive2 = [];
+                var topFiveNumbers2 = [];
+                var data2;
+                
+                $.post("database.php", {select:"topfivedeaths"}, function(awns){
+                    data2 = $.parseJSON(awns);
+                });
+                
+                for(var i = 0; i < data2.length; i++){
+                    topFive2.push(Object.values(data2[i])[0]);
+                    topFiveNumbers2.push(Object.values(data2[i])[1]);
+                }
+                
+                $.post("database.php", {select:"topfivedeathsrest"}, function(awns){
+                    data2 = $.parseJSON(awns);
+                });
+                var derandererest2 = 0;
+                for(var i = 0; i < topFiveNumbers2.length; i++){
+                    derandererest2 = derandererest2 + parseInt(topFiveNumbers2[i]);
+                }
+                console.log(derandererest2);
+                console.log(Object.values(data2[0])[0]);
+                
+                var dataX = Object.values(data2[0])[0] - derandererest2;
+                console.log(dataX);
+                topFive2.push("Rest");
+                topFiveNumbers2.push(dataX);
+                
+                var config = {responsive: true}
+                
+                //Cases Bar chart
+                var trace1 = {
+                    values: topFiveNumbers2,
+                    type: 'pie',
+                    labels: topFive2
+                };
+
+                var data1 = [trace1];
+
+                var layout1 = {
+                    title: 'Top country sum. Deaths'
+                }
+                Plotly.react(plotDeaths, data1, layout1, config);
+            }
+            
+            function plotGraph2(){
+                plotGraph();
+                setTimeout(function(){
+                    plotGraph();
+                }, 1);
+                
+            }
+            plotGraph(); 
+            
+
+        </script>
+
+    </body>
+</html>

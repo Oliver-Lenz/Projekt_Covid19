@@ -1,0 +1,1 @@
+$.post("database.php", function (data){console.log(data)}

@@ -1,0 +1,36 @@
+<html>
+    <head>
+		<script src="jquery-3.5.1.js"></script>
+        <style>
+			.divContainer{
+			height: 100px;
+			border: 2px solid gray;
+			}
+			p{
+				display:flex; 
+				flex-direction: column; 
+				justify-content: center; 
+				align-items: center
+			}
+		</style>
+    </head>
+    <body>
+		
+		<div class = "divContainer">
+			<p>content example</p>
+		</div>
+		
+		<div id=div1>a</div>
+		<div id=div2>b</div>
+		<div id=div3>c</div>
+    </body>
+	
+	<script>
+		var myArray = ["div1", "div2", "div3"]; 
+		$.each( myArray, function( i, val ){
+			$( "#" + val ).css( "background-color", "red" );
+		});
+		
+		
+	</script>
+</html>

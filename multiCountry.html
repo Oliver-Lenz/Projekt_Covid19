@@ -1,0 +1,224 @@
+<html>
+    <head>
+        <style>
+            
+            .item5 { float: right; }
+            
+        </style>
+    </head>
+    <body>
+        <script src="jquery-3.5.1.js"></script>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+        
+        <table style="width:100%">
+            <tr>
+                <td><select id="countrySelector1" class="item5"></select></td>
+                <td><select id="countrySelector2"></select></td> 
+            </tr>
+            <tr>
+                <td><div id="plotCases"></div></td>
+                <td><div id="plotDeaths"></div></td>
+            </tr>
+            <tr>
+                <td><div id="plotCasesSum"></div></td>
+                <td><div id="plotDeathsSum"></div></td>
+            </tr>
+        </table>
+        
+        <script>
+            var selectedCountry1 = "Germany"
+            var selectedCountry2 = "Germany"
+            $.ajaxSetup({async: false});
+            var countryList = [];
+            $.post("database.php", {select:"countrys"}, function(awns){
+                var daten = $.parseJSON(awns);
+                //console.log(daten);
+                
+                for(var i = 0; i< daten.length; i++){
+                    countryList.push(Object.values(daten[i]));
+                }
+                //console.log(countryList);
+                var sel = document.getElementById('countrySelector1');
+                for(var i = 0; i < countryList.length; i++) {
+                    var opt = document.createElement('option');
+                    opt.innerHTML = countryList[i];
+                    opt.value = countryList[i];
+                    sel.appendChild(opt);
+                }
+                var sel = document.getElementById('countrySelector2');
+                for(var i = 0; i < countryList.length; i++) {
+                    var opt = document.createElement('option');
+                    opt.innerHTML = countryList[i];
+                    opt.value = countryList[i];
+                    sel.appendChild(opt);
+                }
+            });
+            
+            function plotGraph(){
+                var str = document.getElementById("countrySelector1");
+                selectedCountry1 = str.options[str.selectedIndex].value;
+                str = document.getElementById("countrySelector2");
+                selectedCountry2 = str.options[str.selectedIndex].value;
+                
+                //First Country data collection
+                var datenCases1;
+                var datenDeaths1;
+                var sumCases1;
+                var sumDeaths1;
+                
+                $.post("database.php", {select:"cases", country:selectedCountry1}, function(awns){
+                    datenCases1 = $.parseJSON(awns);
+                });
+                $.post("database.php", {select:"deaths", country:selectedCountry1}, function(awns){
+                    datenDeaths1 = $.parseJSON(awns);
+                });
+                $.post("database.php", {select:"sums", country:selectedCountry1}, function(awns){
+                    var datenRest = $.parseJSON(awns);
+                    sumCases1 = Object.values(datenRest[0])[0];
+                    sumDeaths1 = Object.values(datenRest[0])[1];
+                });
+                
+                var arrDate1 = [];
+                var arrCases1 = [];
+                for(var i = 0; i < datenCases1.length; i++){
+                    arrDate1.push(Object.values(datenCases1[i])[0]);
+                    arrCases1.push(Object.values(datenCases1[i])[1]);
+                }
+                
+                var arrDeaths1= [];
+                for(var i = 0; i < datenDeaths1.length; i++){
+                    arrDeaths1.push(Object.values(datenDeaths1[i])[1]);
+                }
+                
+                //Second Country data collection
+                var datenCases2;
+                var datenDeaths2;
+                var sumCases2;
+                var sumDeaths2;
+                $.post("database.php", {select:"cases", country:selectedCountry2}, function(awns){
+                    datenCases2 = $.parseJSON(awns);
+                });
+                $.post("database.php", {select:"deaths", country:selectedCountry2}, function(awns){
+                    datenDeaths2 = $.parseJSON(awns);
+                });
+                $.post("database.php", {select:"sums", country:selectedCountry2}, function(awns){
+                    var datenRest = $.parseJSON(awns);
+                    sumCases2 = Object.values(datenRest[0])[0];
+                    sumDeaths2 = Object.values(datenRest[0])[1];
+                });
+                
+                var arrDate2 = [];
+                var arrCases2 = [];
+                for(var i = 0; i < datenCases2.length; i++){
+                    arrDate2.push(Object.values(datenCases2[i])[0]);
+                    arrCases2.push(Object.values(datenCases2[i])[1]);
+                }
+                
+                var arrDeaths2= [];
+                for(var i = 0; i < datenDeaths2.length; i++){
+                    arrDeaths2.push(Object.values(datenDeaths2[i])[1]);
+                }
+                
+                var config = {responsive: true}
+                
+                //Cases Line Chart
+                var trace1_1 = {
+                    x: arrDate1,
+                    y: arrCases1,
+                    type: 'scatter',
+                    name: selectedCountry1
+                };
+                
+                var trace1_2 = {
+                    x: arrDate2,
+                    y: arrCases2,
+                    type: 'scatter',
+                    name: selectedCountry2,
+                    line: {color: 'rgb(0, 200, 100)'}
+                };
+
+                var data1 = [trace1_1, trace1_2];
+
+                var layout1 = {
+                    title: 'Cases'
+                }
+                Plotly.react(plotCases, data1, layout1, config);
+                
+                //Deaths Line Chart
+                var trace2_1 = {
+                    x: arrDate1,
+                    y: arrDeaths1,
+                    type: 'scatter',
+                    name: selectedCountry1
+                };
+                
+                var trace2_2 = {
+                    x: arrDate2,
+                    y: arrDeaths2,
+                    type: 'scatter',
+                    name: selectedCountry2,
+                    line: {color: 'rgb(0, 200, 100)'}
+                };
+
+                var data2 = [trace2_1, trace2_2];
+
+                var layout2 = {
+                    title: 'Deaths'
+                }
+                Plotly.react(plotDeaths, data2, layout2, config);
+                
+                //SumCases Bar Chart
+                
+                var trace3_1 = {
+                    x: [selectedCountry1, selectedCountry2],
+                    y: [sumCases1, sumCases2],
+                    marker: {
+                        color: ['rgb(31, 119, 180)', 'rgb(0, 200, 100)']
+                    },
+                    type: 'bar'
+                };
+
+                var data3 = [trace3_1];
+
+                var layout3 = {
+                    title: 'Summary Cases'
+                };
+                
+                Plotly.react(plotCasesSum, data3, layout3, config);
+                
+                //SumDeaths Bar Chart
+                
+                var trace4_1 = {
+                    x: [selectedCountry1, selectedCountry2],
+                    y: [sumDeaths1, sumDeaths2],
+                    marker: {
+                        color: ['rgb(31, 119, 180)', 'rgb(0, 200, 100)']
+                    },
+                    type: 'bar'
+                };
+
+                var data4 = [trace4_1];
+
+                var layout4 = {
+                    title: 'Summary Deaths'
+                };
+                
+                Plotly.react(plotDeathsSum, data4, layout4, config);
+            }
+            
+            function plotGraph2(){
+                plotGraph();
+                setTimeout(function(){
+                    plotGraph();
+                }, 1);
+                
+            }
+            plotGraph(); 
+            document.getElementById("countrySelector1").addEventListener('change', plotGraph2, false);
+            document.getElementById("countrySelector2").addEventListener('change', plotGraph2, false);
+            
+
+        </script>
+
+    </body>
+</html>
